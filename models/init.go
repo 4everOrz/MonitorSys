@@ -1,6 +1,8 @@
 package models
+
 import (
 	"net/url"
+
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
@@ -24,6 +26,9 @@ func Init() {
 	}
 	orm.RegisterDataBase("default", "mysql", dsn)
 	orm.RegisterModel(new(UserInfo))
+	orm.RegisterModel(new(AppInfo))
+	orm.RegisterModel(new(ServerInfo))
+	orm.RegisterModel(new(MonitorData))
 
 	if beego.AppConfig.String("runmode") == "dev" {
 		orm.Debug = true

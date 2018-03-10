@@ -1,23 +1,27 @@
 package models
+
 import (
 	"fmt"
-	"github.com/astaxie/beego/orm"
 	"gree/GrihCommon/security"
+
+	"github.com/astaxie/beego/orm"
 )
 
 type UserInfo struct {
-	UserID       int64 `orm:"pk"`
-	LoginName    string
-	Password     string
-	UserName     string
-	Telphone     string
-	Email        string
-	AccessToken  string
-	LoginTime    string
+	UserID      int64  `orm:"pk;column(UserID)"`
+	LoginName   string `orm:"column(LoginName)"`
+	Password    string `orm:"column(Password)"`
+	UserName    string `orm:"column(UserName)"`
+	Telphone    string `orm:"column(Telphone)"`
+	Mail        string `orm:"column(Mail)"`
+	AccessToken string `orm:"column(AccessToken)"`
+	LoginTime   string `orm:"column(LoginTime)"`
 }
+
 var (
 	UserList map[string]*UserInfo
 )
+
 func (a *UserInfo) TableName() string {
 	return TableName("userInfo")
 }
@@ -43,7 +47,7 @@ func UserInfoGetListByIds(userId int64) ([]*UserInfo, error) {
 	var list []orm.Params
 	//list:=[]orm.Params
 	var err error
-		_, err = orm.NewOrm().Raw("select UserID,LoginName,Password,UserName,Telphone,Email,RoleID,AccessToken,LoginTime from userInfo where UserID=? order by UserID asc", userId).Values(&list)
+	_, err = orm.NewOrm().Raw("select UserID,LoginName,Password,UserName,Telphone,Email,RoleID,AccessToken,LoginTime from userInfo where UserID=? order by UserID asc", userId).Values(&list)
 	for k, v := range list {
 		fmt.Println(k, v)
 	}
@@ -52,8 +56,8 @@ func UserInfoGetListByIds(userId int64) ([]*UserInfo, error) {
 	return list1, err
 }
 
-func UserInfoAdd(userInfo *UserInfo) (int64, error) {
-	return orm.NewOrm().Insert(userInfo)
+func UserInfoAdd(userinfo *UserInfo) (int64, error) {
+	return orm.NewOrm().Insert(userinfo)
 }
 
 func UserInfoGetById(UserID int) (*UserInfo, error) {
@@ -72,7 +76,7 @@ func Login(username, password string) bool {
 	if err != nil {
 		return false
 	}
-	if a.Password==security.Md5(password+security.Md5(password)){
+	if a.Password == security.Md5(password+security.Md5(password)) {
 		return true
 	}
 	return false

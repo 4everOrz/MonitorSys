@@ -1,12 +1,13 @@
 package controllers
 
 import (
-	"MonitoringSystemAPI/models"
-	"encoding/json"
 	"MonitoringSystemAPI/lib"
+	"MonitoringSystemAPI/models"
 	"net/http"
-	"github.com/astaxie/beego"
 	"strconv"
+	"time"
+
+	"github.com/astaxie/beego"
 )
 
 // Operations about Users
@@ -22,9 +23,17 @@ type UserController struct {
 // @router / [post]
 func (u *UserController) Post() {
 	var user models.UserInfo
-	json.Unmarshal(u.Ctx.Input.RequestBody, &user)
-	uid,_ := models.UserInfoAdd(&user)
-	u.Data["json"] = map[string]string{"uid": strconv.FormatInt(uid,10)  }
+	user.UserID = 0
+	user.LoginName = u.GetString("LoginName")
+	user.UserName = u.GetString("UserName")
+	user.Password = u.GetString("Password")
+	user.Mail = u.GetString("Email")
+	user.Telphone = u.GetString("Telphone")
+	user.LoginTime = time.Now().Format("2006-01-02 15:04:05")
+	user.AccessToken = "dsfdhgdghfre344" /**/
+	//json.Unmarshal(u.Ctx.Input.RequestBody, &user)
+	uid, _ := models.UserInfoAdd(&user)
+	u.Data["json"] = map[string]string{"uid": strconv.FormatInt(uid, 10)}
 	u.ServeJSON()
 }
 
@@ -39,7 +48,7 @@ func (u *UserController) Login() {
 	username := u.GetString("username")
 	password := u.GetString("password")
 	if models.Login(username, password) {
-		token:=lib.GenToken()
+		token := lib.GenToken()
 		cookie := http.Cookie{Name: "Authorization", Value: token, Path: "/", MaxAge: 3600}
 
 		http.SetCookie(u.Ctx.ResponseWriter, &cookie)
@@ -59,4 +68,3 @@ func (u *UserController) Logout() {
 	u.Data["json"] = "logout success"
 	u.ServeJSON()
 }
-

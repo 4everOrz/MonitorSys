@@ -1,12 +1,13 @@
 package main
 
 import (
-	_ "MonitoringSystemAPI/routers"
 	"MonitoringSystemAPI/lib"
 	"MonitoringSystemAPI/models"
+	_ "MonitoringSystemAPI/routers"
+	"net/http"
+
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
-	"net/http"
 )
 
 func main() {
