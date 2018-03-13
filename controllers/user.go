@@ -3,9 +3,11 @@ package controllers
 import (
 	"MonitoringSystemAPI/lib"
 	"MonitoringSystemAPI/models"
+	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
+	//"time"
 
 	"github.com/astaxie/beego"
 )
@@ -23,15 +25,8 @@ type UserController struct {
 // @router / [post]
 func (u *UserController) Post() {
 	var user models.UserInfo
-	user.UserID = 0
-	user.LoginName = u.GetString("LoginName")
-	user.UserName = u.GetString("UserName")
-	user.Password = u.GetString("Password")
-	user.Mail = u.GetString("Email")
-	user.Telphone = u.GetString("Telphone")
+	json.Unmarshal(u.Ctx.Input.RequestBody, &user)
 	user.LoginTime = time.Now().Format("2006-01-02 15:04:05")
-	user.AccessToken = "dsfdhgdghfre344" /**/
-	//json.Unmarshal(u.Ctx.Input.RequestBody, &user)
 	uid, _ := models.UserInfoAdd(&user)
 	u.Data["json"] = map[string]string{"uid": strconv.FormatInt(uid, 10)}
 	u.ServeJSON()

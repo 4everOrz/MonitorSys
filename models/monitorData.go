@@ -1,10 +1,14 @@
 package models
 
-import "github.com/astaxie/beego/orm"
+import (
+	_ "github.com/astaxie/beego/cache/redis"
+	"github.com/astaxie/beego/orm"
+	_ "github.com/go-sql-driver/mysql"
+)
 
 type MonitorData struct {
 	DataID          int64  `orm:"pk;column(DataID)"`
-	AppID           string `orm:"column(AppID)"`
+	AppID           int64  `orm:"column(AppID)"`
 	ServerAddress   string `orm:"column(ServerAddress)"`
 	Port            string `orm:"column(Port)"`
 	NetworkType     string `orm:"column(NetworkType)"`
@@ -21,6 +25,6 @@ var (
 func (m *MonitorData) TableName() string {
 	return TableName("monitorData")
 }
-func MonitorDataAdd(monitordata *MonitorData) (int64, error) {
+func AddOne(monitordata *MonitorData) (int64, error) {
 	return orm.NewOrm().Insert(monitordata)
 }

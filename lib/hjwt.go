@@ -1,9 +1,12 @@
 package lib
+
 import (
 	"fmt"
+	"log"
 	"time"
-	jwt "github.com/dgrijalva/jwt-go"
+
 	"github.com/astaxie/beego"
+	jwt "github.com/dgrijalva/jwt-go"
 )
 
 var (
@@ -37,4 +40,10 @@ func CheckToken(token string) bool {
 		return false
 	}
 	return true
+}
+func FailOnErr(err error, msg string) {
+	if err != nil {
+		log.Fatalf("%s:%s", msg, err)
+		panic(fmt.Sprintf("%s:%s", msg, err))
+	}
 }

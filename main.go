@@ -1,13 +1,11 @@
 package main
 
 import (
-	"MonitoringSystemAPI/lib"
+	"MonitoringSystemAPI/Data"
 	"MonitoringSystemAPI/models"
 	_ "MonitoringSystemAPI/routers"
-	"net/http"
 
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/context"
 )
 
 func main() {
@@ -17,11 +15,13 @@ func main() {
 		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
 	}
 	models.Init()
-	beego.InsertFilter("/platform/*", beego.BeforeRouter, func(ctx *context.Context) {
+	go Data.MqReceive()
+	/*	beego.InsertFilter("/platform/*", beego.BeforeRouter, func(ctx *context.Context) {
 		cookie, err := ctx.Request.Cookie("Authorization")
 		if err != nil || !lib.CheckToken(cookie.Value) {
 			http.Redirect(ctx.ResponseWriter, ctx.Request, "/", http.StatusMovedPermanently)
 		}
-	})
+	})*/
 	beego.Run()
+
 }
