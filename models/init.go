@@ -33,9 +33,9 @@ func Init() {
 	orm.RegisterModel(new(ServerInfo))
 	orm.RegisterModel(new(MonitorData))
 
-	if beego.AppConfig.String("runmode") == "dev" {
-		orm.Debug = true
-	}
+	/*	if beego.AppConfig.String("runmode") == "dev" {
+		orm.Debug = false
+	}*/
 	/**********************redis初始化**************************************/
 	/*	rdhost := beego.AppConfig.String("rd.host")
 		rdport := beego.AppConfig.String("rd.port")

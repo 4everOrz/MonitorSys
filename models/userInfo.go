@@ -1,6 +1,7 @@
 package models
 
 import (
+	"MonitoringSystemAPI/lib"
 	"fmt"
 	"gree/GrihCommon/security"
 
@@ -16,6 +17,7 @@ type UserInfo struct {
 	Mail        string `orm:"column(Mail)"`
 	AccessToken string `orm:"column(AccessToken)"`
 	LoginTime   string `orm:"column(LoginTime)"`
+	RoleID      int    `orm:"column(RoleID)"`
 }
 
 var (
@@ -27,17 +29,18 @@ func (a *UserInfo) TableName() string {
 }
 
 func UserInfoGetList(page, pageSize int, filters ...interface{}) ([]*UserInfo, int64) {
+	user := new(UserInfo)
 	offset := (page - 1) * pageSize
 	list := make([]*UserInfo, 0)
-	query := orm.NewOrm().QueryTable(TableName("userInfo"))
-	if len(filters) > 0 {
+	query := orm.NewOrm().QueryTable(user)
+	/*	if len(filters) > 0 {
 		l := len(filters)
 		for k := 0; k < l; k += 2 {
 			query = query.Filter(filters[k].(string), filters[k+1])
 		}
-	}
+	}*/
 	total, _ := query.Count()
-	query.OrderBy("UserID", "sort").Limit(pageSize, offset).All(&list)
+	query.OrderBy("UserID").Limit(pageSize, offset).All(&list)
 
 	return list, total
 }
@@ -70,20 +73,50 @@ func UserInfoGetById(UserID int) (*UserInfo, error) {
 	return a, nil
 }
 
-func Login(username, password string) bool {
+func Login(loginname, password, token string) bool {
+	var booler bool
 	a := new(UserInfo)
-	err := orm.NewOrm().QueryTable(TableName("userInfo")).Filter("LoginName", username).One(a)
-	if err != nil {
-		return false
-	}
+	o := orm.NewOrm()
+	o.Raw("SELECT * from userInfo where LoginName = ?", loginname).QueryRow(&a)
+
 	if a.Password == security.Md5(password+security.Md5(password)) {
-		return true
+		_, err := o.Raw("UPDATE userInfo Set AccessToken = ? WHERE LoginName = ? AND Password = ?", token, a.LoginName, a.Password).Exec()
+		if err == nil {
+			booler = true
+		}
+	} else {
+		booler = false
 	}
-	return false
+	return booler
 }
 func (a *UserInfo) Update(fields ...string) error {
 	if _, err := orm.NewOrm().Update(a, fields...); err != nil {
 		return err
 	}
 	return nil
+}
+func UserExist(loginname string) int64 {
+	var user []UserInfo
+	num, err := orm.NewOrm().Raw("SELECT * FROM userInfo WHERE LoginName = ?", loginname).QueryRows(&user)
+	var RowAffect int64
+	if err == nil {
+
+		RowAffect = num
+	}
+	return RowAffect
+}
+func VerifyUser(token, loginname string) bool {
+	user := new(UserInfo)
+	orm.NewOrm().Raw("SELECT * FROM userInfo WHERE LoginName = ?", loginname).QueryRow(&user)
+	if user.AccessToken == token {
+		return true
+	} else {
+		return false
+	}
+}
+func UpdateKey(loginname, oldkey, newkey string) int64 {
+	user := new(UserInfo)
+	rowaffect, err := orm.NewOrm().Raw("UPDATE userInfo SET Password = ? WHERE LoginName=? AND Password =?", newkey, loginname, oldkey).QueryRows(&user)
+	lib.FailOnErr(err, "Update error")
+	return rowaffect
 }

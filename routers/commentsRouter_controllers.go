@@ -9,8 +9,16 @@ func init() {
 
 	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:AppController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:AppController"],
 		beego.ControllerComments{
-			Method: "Post",
-			Router: `/`,
+			Method: "AppLogin",
+			Router: `/alogin`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:AppController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:AppController"],
+		beego.ControllerComments{
+			Method: "AppRegist",
+			Router: `/aregist`,
 			AllowHTTPMethods: []string{"post"},
 			MethodParams: param.Make(),
 			Params: nil})
@@ -31,10 +39,34 @@ func init() {
 			MethodParams: param.Make(),
 			Params: nil})
 
+	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:MdController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:MdController"],
+		beego.ControllerComments{
+			Method: "GetAll",
+			Router: `/getall`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:MdController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:MdController"],
+		beego.ControllerComments{
+			Method: "GetData",
+			Router: `/getone`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
 	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:UserController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:UserController"],
 		beego.ControllerComments{
-			Method: "Post",
-			Router: `/`,
+			Method: "Changekey",
+			Router: `/changekey`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:UserController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:UserController"],
+		beego.ControllerComments{
+			Method: "Getall",
+			Router: `/getall`,
 			AllowHTTPMethods: []string{"post"},
 			MethodParams: param.Make(),
 			Params: nil})
@@ -42,15 +74,31 @@ func init() {
 	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:UserController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:UserController"],
 		beego.ControllerComments{
 			Method: "Login",
-			Router: `/login`,
-			AllowHTTPMethods: []string{"get"},
+			Router: `/ulogin`,
+			AllowHTTPMethods: []string{"post"},
 			MethodParams: param.Make(),
 			Params: nil})
 
 	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:UserController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:UserController"],
 		beego.ControllerComments{
 			Method: "Logout",
-			Router: `/logout`,
+			Router: `/ulogout`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:UserController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:UserController"],
+		beego.ControllerComments{
+			Method: "Regist",
+			Router: `/uregist`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:WebSocketController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:WebSocketController"],
+		beego.ControllerComments{
+			Method: "Join",
+			Router: `/`,
 			AllowHTTPMethods: []string{"get"},
 			MethodParams: param.Make(),
 			Params: nil})
