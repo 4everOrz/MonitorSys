@@ -8,6 +8,7 @@ type ServerInfo struct {
 	ServerAddress string `orm:"column(ServerAddress)"`
 	Port          string `orm:"column(Port)"`
 	Delay         string `orm:"column(Delay)"`
+	//MonitorData   []*MonitorData `orm:"reverse(many)"`
 }
 
 var (
@@ -17,11 +18,28 @@ var (
 func (s *ServerInfo) TableName() string {
 	return TableName("serverInfo")
 }
-func ServerInfoAdd(serverinfo *ServerInfo) (int64, error) {
+func AddSver(serverinfo *ServerInfo) (int64, error) {
+
 	return orm.NewOrm().Insert(serverinfo)
 }
-func Sbyaddress(saddress string) *ServerInfo {
+func GetSverByAddress(saddress string) *ServerInfo {
 	s := new(ServerInfo)
 	orm.NewOrm().Raw("SELECT * FROM serverInfo where Address = ?", saddress).QueryRow(&s)
 	return s
+}
+
+//条件获取
+func GetSverFilter() []orm.Params {
+	var op []orm.Params
+	//	orm.NewOrm().QueryTable(serverInfo).All(&serarry, "ServerAddress", "Delay")
+	orm.NewOrm().Raw("SELECT *  FROM serverInfo").Values(&op, "ServerAddress", "Delay")
+	return op
+}
+
+//获取全部
+func GetSverAll() []orm.Params {
+	var op []orm.Params
+	orm.NewOrm().Raw("SELECT *  FROM serverInfo").Values(&op)
+	return op
+
 }

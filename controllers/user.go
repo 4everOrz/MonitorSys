@@ -3,9 +3,6 @@ package controllers
 import (
 	"MonitoringSystemAPI/lib"
 	"MonitoringSystemAPI/models"
-	"encoding/json"
-	"fmt"
-	"log"
 	"security"
 	"strconv"
 	"time"
@@ -18,7 +15,7 @@ import (
 type Result struct {
 	ResCode    int64
 	ResMsg     string
-	TotalCount int64
+	TotalCount int
 	ResData    interface{}
 }
 
@@ -29,28 +26,39 @@ type UserController struct {
 	beego.Controller
 }
 
-// @Title CreateUser
-// @Description create users
-// @Param	body		body 	models.User	true		"body for user content"
-// @Success 200 {int} models.User.Id
+// @Title 添加用户
+// @Description 实现新用户的注册
+// @Param  UserName	     formData     string 	  true		"用户姓名"
+// @Param  LoginName    formData      string      true       "登录名"
+// @Param  Password     formData      string      true      "密码"
+// @Param  Telphone     formData      string     false       "电话"
+// @Param  Mail         formData      string     false       "邮件"
+// @Success 200 {object} models.User.Result
 // @Failure 403 body is empty
 // @router /uregist [post]
 func (u *UserController) Regist() {
 	var user models.UserInfo
-	json.Unmarshal(u.Ctx.Input.RequestBody, &user)
+	var usermap map[string]interface{}
+	usermap = make(map[string]interface{})
+	//json.Unmarshal(u.Ctx.Input.RequestBody, &user)
+	user.UserName = u.GetString("UserName")
+	user.LoginName = u.GetString("LoginName")
+	user.Password = u.GetString("Password")
+	user.Telphone = u.GetString("Telphone")
+	user.Mail = u.GetString("Mail")
 	user.LoginTime = time.Now().Format("2006-01-02 15:04:05")
 	user.RoleID = 1
 	user.Password = security.Md5(user.Password + security.Md5(user.Password))
 	if models.UserExist(user.LoginName) != 0 {
-		fmt.Printf("LoginName has exist")
-
-		u.Data["json"] = map[string]interface{}{"resCode": "1", "resMsg": "Change LoginName and try again", "resData": "null"}
+		result := &Result{1, "LoginName has exist", 0, nil}
+		u.Data["json"] = result
 
 	} else {
 		UserID, _ := models.UserInfoAdd(&user)
-		//Result{"1", "failed", 0, UserID}
-
-		u.Data["json"] = map[string]interface{}{"resCode": "0", "resMsg": "success", "UserID": strconv.FormatInt(UserID, 10)}
+		//Result{"1", "failed", 0, UserID}//strconv.FormatInt(UserID, 10, 64)
+		usermap["UserID"] = UserID
+		result := &Result{0, "success", 0, usermap}
+		u.Data["json"] = result
 	}
 	u.ServeJSON()
 }
@@ -63,17 +71,23 @@ func (u *UserController) Regist() {
 // @Failure 403 user not exist
 // @router /ulogin [post]
 func (u *UserController) Login() {
-	var user models.UserInfo
-	json.Unmarshal(u.Ctx.Input.RequestBody, &user)
-	user.AccessToken = lib.GenToken()
-	if models.Login(user.LoginName, user.Password, user.AccessToken) {
-		Result := &Result{0, "success", 0, user.AccessToken}
-
-		//b, _ := json.Marshal(Result)
-		//u.Data["json"] = map[string]interface{}{"resCode": 0, "resMsg": "success", "AccessToken": user.AccessToken}
-		u.Data["json"] = Result
+	var usermap map[string]interface{}
+	usermap = make(map[string]interface{})
+	loginname := u.GetString("LoginName")
+	password := u.GetString("Password")
+	accesstoken := lib.GenToken()
+	if models.UserExist(loginname) == 0 {
+		result := &Result{1, "LoginName not exist", 0, nil}
+		u.Data["json"] = result
 	} else {
-		u.Data["json"] = map[string]interface{}{"resCode": 1, "resMsg": "user not exist"}
+		if models.Login(loginname, password, accesstoken) {
+			usermap["AccessToken"] = accesstoken
+			result := &Result{0, "success", 0, usermap}
+			u.Data["json"] = result
+		} else {
+			result := &Result{1, "wrong password", 0, nil}
+			u.Data["json"] = result
+		}
 	}
 	u.ServeJSON()
 }
@@ -96,21 +110,29 @@ func (u *UserController) Logout() {
 // @Failure 403 user not exist
 // @router /changekey [post]
 func (u *UserController) Changekey() {
-	//	var user models.UserInfo
+
+	//	var usermap map[string]interface{}
+	//	usermap = make(map[string]interface{})
 	newpassword := u.GetString("NewPassword")
 	oldpassword := u.GetString("Password")
-	loginname := u.GetString("loginname")
+	loginname := u.GetString("LoginName")
 	accesstoken := u.GetString("AccessToken")
-	security.Md5(newpassword + security.Md5(newpassword))
-	security.Md5(oldpassword + security.Md5(oldpassword))
+
 	//	json.Unmarshal(u.Ctx.Input.RequestBody, &user)
 	if models.VerifyUser(accesstoken, loginname) {
-		if models.UpdateKey(loginname, oldpassword, newpassword) == 1 {
-			u.Data["json"] = map[string]interface{}{"resCode": 0, "resMsg": "Change Ok"}
+		newpsw := security.Md5(newpassword + security.Md5(newpassword))
+		oldpsw := security.Md5(oldpassword + security.Md5(oldpassword))
+		if models.UpdateKey(loginname, oldpsw, newpsw) == 1 {
+
+			result := &Result{0, "success", 0, nil}
+			u.Data["json"] = result
+		} else {
+			result := &Result{1, "check your password", 0, nil}
+			u.Data["json"] = result
 		}
 	} else {
-		u.Data["json"] = map[string]interface{}{"resCode": 1, "resMsg": "User verify error(Check AccessToken)!"}
-		log.Println("Error:User verify error(Check AccessToken)!")
+		result := &Result{1, "User verify error(Check AccessToken)", 0, nil}
+		u.Data["json"] = result
 	}
 	u.ServeJSON()
 }
@@ -130,8 +152,8 @@ func (u *UserController) Getall() {
 	page, _ := strconv.Atoi(pa1ge)
 	pagesize, _ := strconv.Atoi(pa1gesize)
 	var tt []interface{} = []interface{}{"", 0}
-	users, total := models.UserInfoGetList(page, pagesize, tt)
-	Res := &Result{0, "success", total, users}
+	users, _ := models.UserInfoGetList(page, pagesize, tt)
+	Res := &Result{0, "success", 0, users}
 	u.Data["json"] = Res
 	u.ServeJSON()
 }

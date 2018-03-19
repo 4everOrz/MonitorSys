@@ -99,6 +99,7 @@ func UserExist(loginname string) int64 {
 	var user []UserInfo
 	num, err := orm.NewOrm().Raw("SELECT * FROM userInfo WHERE LoginName = ?", loginname).QueryRows(&user)
 	var RowAffect int64
+	RowAffect = 0
 	if err == nil {
 
 		RowAffect = num
@@ -115,8 +116,9 @@ func VerifyUser(token, loginname string) bool {
 	}
 }
 func UpdateKey(loginname, oldkey, newkey string) int64 {
-	user := new(UserInfo)
-	rowaffect, err := orm.NewOrm().Raw("UPDATE userInfo SET Password = ? WHERE LoginName=? AND Password =?", newkey, loginname, oldkey).QueryRows(&user)
+	userInfo := new(UserInfo)
+	rowaffect, err := orm.NewOrm().QueryTable(userInfo).Filter("LoginName", loginname).Filter("Password", oldkey).Update(orm.Params{
+		"Password": newkey})
 	lib.FailOnErr(err, "Update error")
 	return rowaffect
 }

@@ -65,14 +65,21 @@ func (md *MdController) GetData() {
 // @Failure 403 body is empty
 // @router /getall [post]
 func (md *MdController) GetAll() {
-	pa1ge := md.GetString("Page")
-	pa1gesize := md.GetString("PageSize")
-	page, _ := strconv.Atoi(pa1ge)
-	pagesize, _ := strconv.Atoi(pa1gesize)
-	var tt []interface{} = []interface{}{"", 0}
-	data, total := models.GetMDbyPage(page, pagesize, tt)
-	Res := &Result{0, "success", total, data}
-
-	md.Data["json"] = Res
+	loginname := md.GetString("LoginName")
+	accesstoken := md.GetString("AccessToken")
+	if models.VerifyUser(accesstoken, loginname) {
+		pa1ge := md.GetString("Page")
+		pa1gesize := md.GetString("PageSize")
+		appname := md.GetString("AppName")
+		servername := md.GetString("ServerName")
+		page, _ := strconv.Atoi(pa1ge)
+		pagesize, _ := strconv.Atoi(pa1gesize)
+		data, total := models.GetMDbyPage2(page, pagesize, appname, servername)
+		result := &Result{0, "success", total, data}
+		md.Data["json"] = result
+	} else {
+		result := &Result{1, "LoginName has exist", 0, nil}
+		md.Data["json"] = result
+	}
 	md.ServeJSON()
 }

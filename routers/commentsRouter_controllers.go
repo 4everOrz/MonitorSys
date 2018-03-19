@@ -55,6 +55,30 @@ func init() {
 			MethodParams: param.Make(),
 			Params: nil})
 
+	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:ServerController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:ServerController"],
+		beego.ControllerComments{
+			Method: "Addone",
+			Router: `/add`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:ServerController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:ServerController"],
+		beego.ControllerComments{
+			Method: "GetServerAll",
+			Router: `/all`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:ServerController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:ServerController"],
+		beego.ControllerComments{
+			Method: "GetServerFilter",
+			Router: `/filter`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
 	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:UserController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:UserController"],
 		beego.ControllerComments{
 			Method: "Changekey",

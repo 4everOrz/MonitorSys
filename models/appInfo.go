@@ -13,6 +13,7 @@ type AppInfo struct {
 	AppToken string `orm:"column(AppToken)"`
 	Region   string `orm:"column(Region)"`
 	RegTime  string `orm:"column(RegTime)"`
+	//MonitorData []*MonitorData `orm:"reverse(many)"`
 }
 
 var (
@@ -25,21 +26,18 @@ func (a *AppInfo) TableName() string {
 func AppInfoAdd(appinfo *AppInfo) (int64, error) {
 	return orm.NewOrm().Insert(appinfo)
 }
-func AppLogin(appname, password, token string) bool {
-	var booler bool
+func AppLogin(appname, password string) int64 {
+	var appid int64
 	a := new(AppInfo)
 	o := orm.NewOrm()
+	password = security.Md5(password + security.Md5(password))
 	o.Raw("SELECT * from appInfo where AppName = ?", appname).QueryRow(&a)
-	ps := security.Md5(password + security.Md5(password))
-	if a.Password == ps {
-		_, err := o.Raw("UPDATE userInfo Set AccessToken = ? WHERE LoginName = ? AND Password = ?", token, appname, password).Exec()
-		if err == nil {
-			booler = true
-		}
+	if a.Password == password {
+		appid = a.AppID
 	} else {
-		booler = false
+		appid = 0
 	}
-	return booler
+	return appid
 }
 func AppExist(AppName string) int64 {
 	var app []AppInfo
