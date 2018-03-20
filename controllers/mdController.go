@@ -21,10 +21,15 @@ type MdController struct {
 // @router / [post]
 func (md *MdController) Post() {
 	//	var m lib.Mqfeild
-	Data.MqSend(md.Ctx.Input.RequestBody)
+	err := Data.MqSend(md.Ctx.Input.RequestBody)
 	//go lib.MqReceive()
-	ms := "send to mq OK!"
-	md.Data["json"] = ms
+	if err != nil {
+		result := &Result{1, "failed", 0, nil}
+		md.Data["json"] = result
+	} else {
+		result := &Result{0, "succeed", 0, nil}
+		md.Data["json"] = result
+	}
 	md.ServeJSON()
 
 }

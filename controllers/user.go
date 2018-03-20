@@ -71,8 +71,8 @@ func (u *UserController) Regist() {
 // @Failure 403 user not exist
 // @router /ulogin [post]
 func (u *UserController) Login() {
-	var usermap map[string]interface{}
-	usermap = make(map[string]interface{})
+	//var usermap map[string]interface{}
+	//usermap = make(map[string]interface{})
 	loginname := u.GetString("LoginName")
 	password := u.GetString("Password")
 	accesstoken := lib.GenToken()
@@ -80,9 +80,10 @@ func (u *UserController) Login() {
 		result := &Result{1, "LoginName not exist", 0, nil}
 		u.Data["json"] = result
 	} else {
-		if models.Login(loginname, password, accesstoken) {
-			usermap["AccessToken"] = accesstoken
-			result := &Result{0, "success", 0, usermap}
+		booler, arry := models.Login(loginname, password, accesstoken)
+		if booler {
+			arry := arry[0]
+			result := &Result{0, "success", 0, arry}
 			u.Data["json"] = result
 		} else {
 			result := &Result{1, "wrong password", 0, nil}

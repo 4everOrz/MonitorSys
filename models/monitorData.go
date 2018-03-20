@@ -46,8 +46,7 @@ func GetOne(dataid int64) []orm.Params {
 	return maps
 }
 
-//分页获取监控数据，方式有待优化
-func GetMDbyPage1(page, pageSize int, filters ...interface{}) ([]orm.Params, int64) {
+func GetMDbyID(dataid int64) []orm.Params {
 	/* 	o := orm.NewOrm()
 	   	var maps []orm.Params //
 	   	rawseter := o.Raw("SELECT D.DataID,D.AppID,A.AppName,D.ServerAddress,S.ServerName,A.Region,D.Port,D.NetworkType,D.NetworkProtocol,D.StatusCode,D.FlagBit,D.SubTime From monitorData as D INNER JOIN appInfo as A on D.AppID = A.AppID INNER JOIN serverInfo as S ON D.ServerAddress=S.ServerAddress ORDER BY D.SubTime desc;")
@@ -72,14 +71,13 @@ func GetMDbyPage1(page, pageSize int, filters ...interface{}) ([]orm.Params, int
 	/********************************************/
 	o := orm.NewOrm()
 	var maps []orm.Params
-	monitor := new(MonitorData)
-	offset := (page - 1) * pageSize
-	total, err1 := o.QueryTable(monitor).Count()
-	if err1 == nil {
-		_, err2 := o.Raw("SELECT D.DataID,D.AppID,A.AppName,D.ServerAddress,S.ServerName,A.Region,D.Port,D.Operator,D.NetworkType,D.NetworkProtocol,D.StatusCode,D.FlagBit,D.SubTime From monitorData as D INNER JOIN appInfo as A on D.AppID = A.AppID INNER JOIN serverInfo as S ON D.ServerAddress=S.ServerAddress ORDER BY D.SubTime desc LIMIT ? OFFSET ? ", pageSize, offset).Values(&maps, "DataID", "AppID", "AppName", "ServerAddress", "ServerName", "Region", "Port", "Operator", "NetworkType", "NetworkProtocol", "StatusCode", "FlagBit", "SubTime")
-		lib.FailOnErr(err2, "models/MonitorData/GetMDbyPage ")
+	affect, err := o.Raw("SELECT D.DataID,D.AppID,A.AppName,D.ServerAddress,S.ServerID,S.ServerName,A.Region,D.Port,D.Operator,D.NetworkType,D.NetworkProtocol,D.StatusCode,D.FlagBit,D.SubTime From monitorData as D INNER JOIN appInfo as A on D.AppID = A.AppID INNER JOIN serverInfo as S ON D.ServerAddress=S.ServerAddress WHERE D.DataID=? ORDER BY D.SubTime desc", dataid).Values(&maps, "DataID", "AppID", "AppName", "ServerID", "ServerAddress", "ServerName", "Region", "Port", "Operator", "NetworkType", "NetworkProtocol", "StatusCode", "FlagBit", "SubTime")
+	lib.FailOnErr(err, "models/MonitorData/GetMDbyPage ")
+	for k, v := range maps {
+		fmt.Println(k, v)
 	}
-	return maps, total
+	fmt.Println("affect", affect)
+	return maps
 }
 
 //分页获取监控数据
@@ -92,7 +90,7 @@ func GetMDbyPage2(page, pageSize int, appname, servername string) ([]orm.Params,
 	if appname == "" && servername == "" {
 		_, err1 := o.QueryTable(monitor).Count()
 		if err1 == nil {
-			_, err2 := o.Raw("SELECT D.DataID,D.AppID,A.AppName,D.ServerAddress,S.ServerName,A.Region,D.Port,D.Operator,D.NetworkType,D.NetworkProtocol,D.StatusCode,D.FlagBit,D.SubTime From monitorData as D INNER JOIN appInfo as A on D.AppID = A.AppID INNER JOIN serverInfo as S ON D.ServerAddress=S.ServerAddress ORDER BY D.SubTime desc LIMIT ? OFFSET ? ", pageSize, offset).Values(&maps, "DataID", "AppID", "AppName", "ServerAddress", "ServerName", "Region", "Port", "Operator", "NetworkType", "NetworkProtocol", "StatusCode", "FlagBit", "SubTime")
+			_, err2 := o.Raw("SELECT D.DataID,D.AppID,A.AppName,D.ServerAddress,S.ServerID,S.ServerName,A.Region,D.Port,D.Operator,D.NetworkType,D.NetworkProtocol,D.StatusCode,D.FlagBit,D.SubTime From monitorData as D INNER JOIN appInfo as A on D.AppID = A.AppID INNER JOIN serverInfo as S ON D.ServerAddress=S.ServerAddress ORDER BY D.SubTime desc LIMIT ? OFFSET ? ", pageSize, offset).Values(&maps, "DataID", "AppID", "AppName", "ServerID", "ServerAddress", "ServerName", "Region", "Port", "Operator", "NetworkType", "NetworkProtocol", "StatusCode", "FlagBit", "SubTime")
 			lib.FailOnErr(err2, "models/MonitorData/GetMDbyPage ")
 		}
 		total = len(maps)
@@ -100,14 +98,14 @@ func GetMDbyPage2(page, pageSize int, appname, servername string) ([]orm.Params,
 	} else if appname != "" && servername == "" {
 		_, err1 := o.QueryTable(monitor).Count()
 		if err1 == nil {
-			_, err2 := o.Raw("SELECT D.DataID,D.AppID,A.AppName,D.ServerAddress,S.ServerName,A.Region,D.Port,D.Operator,D.NetworkType,D.NetworkProtocol,D.StatusCode,D.FlagBit,D.SubTime From monitorData as D INNER JOIN appInfo as A on D.AppID = A.AppID INNER JOIN serverInfo as S ON D.ServerAddress=S.ServerAddress  WHERE AppName = ? ORDER BY D.SubTime desc LIMIT ? OFFSET ? ", appname, pageSize, offset).Values(&maps, "DataID", "AppID", "AppName", "ServerAddress", "ServerName", "Region", "Port", "Operator", "NetworkType", "NetworkProtocol", "StatusCode", "FlagBit", "SubTime")
+			_, err2 := o.Raw("SELECT D.DataID,D.AppID,A.AppName,D.ServerAddress,S.ServerID,S.ServerName,A.Region,D.Port,D.Operator,D.NetworkType,D.NetworkProtocol,D.StatusCode,D.FlagBit,D.SubTime From monitorData as D INNER JOIN appInfo as A on D.AppID = A.AppID INNER JOIN serverInfo as S ON D.ServerAddress=S.ServerAddress  WHERE AppName = ? ORDER BY D.SubTime desc LIMIT ? OFFSET ? ", appname, pageSize, offset).Values(&maps, "DataID", "AppID", "AppName", "ServerID", "ServerAddress", "ServerName", "Region", "Port", "Operator", "NetworkType", "NetworkProtocol", "StatusCode", "FlagBit", "SubTime")
 			lib.FailOnErr(err2, "models/MonitorData/GetMDbyPage ")
 		}
 		total = len(maps)
 	} else if appname == "" && servername != "" {
 		_, err1 := o.QueryTable(monitor).Count()
 		if err1 == nil {
-			_, err2 := o.Raw("SELECT D.DataID,D.AppID,A.AppName,D.ServerAddress,S.ServerName,A.Region,D.Port,D.Operator,D.NetworkType,D.NetworkProtocol,D.StatusCode,D.FlagBit,D.SubTime From monitorData as D INNER JOIN appInfo as A on D.AppID = A.AppID INNER JOIN serverInfo as S ON D.ServerAddress=S.ServerAddress WHERE ServerName = ? ORDER BY D.SubTime  desc LIMIT ? OFFSET ? ", servername, pageSize, offset).Values(&maps, "DataID", "AppID", "AppName", "ServerAddress", "ServerName", "Region", "Port", "Operator", "NetworkType", "NetworkProtocol", "StatusCode", "FlagBit", "SubTime")
+			_, err2 := o.Raw("SELECT D.DataID,D.AppID,A.AppName,D.ServerAddress,S.ServerID,S.ServerName,A.Region,D.Port,D.Operator,D.NetworkType,D.NetworkProtocol,D.StatusCode,D.FlagBit,D.SubTime From monitorData as D INNER JOIN appInfo as A on D.AppID = A.AppID INNER JOIN serverInfo as S ON D.ServerAddress=S.ServerAddress WHERE ServerName = ? ORDER BY D.SubTime  desc LIMIT ? OFFSET ? ", servername, pageSize, offset).Values(&maps, "DataID", "AppID", "AppName", "ServerID", "ServerAddress", "ServerName", "Region", "Port", "Operator", "NetworkType", "NetworkProtocol", "StatusCode", "FlagBit", "SubTime")
 			lib.FailOnErr(err2, "models/MonitorData/GetMDbyPage ")
 		}
 
@@ -115,7 +113,7 @@ func GetMDbyPage2(page, pageSize int, appname, servername string) ([]orm.Params,
 	} else if appname != "" && servername != "" {
 		_, err1 := o.QueryTable(monitor).Count()
 		if err1 == nil {
-			_, err2 := o.Raw("SELECT D.DataID,D.AppID,A.AppName,D.ServerAddress,S.ServerName,A.Region,D.Port,D.Operator,D.NetworkType,D.NetworkProtocol,D.StatusCode,D.FlagBit,D.SubTime From monitorData as D INNER JOIN appInfo as A on D.AppID = A.AppID INNER JOIN serverInfo as S ON D.ServerAddress=S.ServerAddress WHERE AppName = ? AND ServerName = ? ORDER BY D.SubTime desc LIMIT ? OFFSET ?  ", appname, servername, pageSize, offset).Values(&maps, "DataID", "AppID", "AppName", "ServerAddress", "ServerName", "Region", "Port", "Operator", "NetworkType", "NetworkProtocol", "StatusCode", "FlagBit", "SubTime")
+			_, err2 := o.Raw("SELECT D.DataID,D.AppID,A.AppName,D.ServerAddress,S.ServerID,S.ServerName,A.Region,D.Port,D.Operator,D.NetworkType,D.NetworkProtocol,D.StatusCode,D.FlagBit,D.SubTime From monitorData as D INNER JOIN appInfo as A on D.AppID = A.AppID INNER JOIN serverInfo as S ON D.ServerAddress=S.ServerAddress WHERE AppName = ? AND ServerName = ? ORDER BY D.SubTime desc LIMIT ? OFFSET ?  ", appname, servername, pageSize, offset).Values(&maps, "DataID", "AppID", "AppName", "ServerID", "ServerAddress", "ServerName", "Region", "Port", "Operator", "NetworkType", "NetworkProtocol", "StatusCode", "FlagBit", "SubTime")
 			lib.FailOnErr(err2, "models/MonitorData/GetMDbyPage ")
 		}
 		total = len(maps)

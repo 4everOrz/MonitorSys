@@ -73,8 +73,9 @@ func UserInfoGetById(UserID int) (*UserInfo, error) {
 	return a, nil
 }
 
-func Login(loginname, password, token string) bool {
+func Login(loginname, password, token string) (bool, []orm.Params) {
 	var booler bool
+	var arry []orm.Params
 	a := new(UserInfo)
 	o := orm.NewOrm()
 	o.Raw("SELECT * from userInfo where LoginName = ?", loginname).QueryRow(&a)
@@ -83,11 +84,12 @@ func Login(loginname, password, token string) bool {
 		_, err := o.Raw("UPDATE userInfo Set AccessToken = ? WHERE LoginName = ? AND Password = ?", token, a.LoginName, a.Password).Exec()
 		if err == nil {
 			booler = true
+			arry, _ = UserJoinRole(loginname)
 		}
 	} else {
 		booler = false
 	}
-	return booler
+	return booler, arry
 }
 func (a *UserInfo) Update(fields ...string) error {
 	if _, err := orm.NewOrm().Update(a, fields...); err != nil {
@@ -121,4 +123,9 @@ func UpdateKey(loginname, oldkey, newkey string) int64 {
 		"Password": newkey})
 	lib.FailOnErr(err, "Update error")
 	return rowaffect
+}
+func UserJoinRole(loginname string) ([]orm.Params, error) {
+	var maps []orm.Params
+	_, err := orm.NewOrm().Raw("SELECT * FROM userInfo AS u Inner join roleInfo AS r on u.RoleID = r.RoleID WHERE LoginName=?", loginname).Values(&maps, "AccessToken", "RoleName")
+	return maps, err
 }

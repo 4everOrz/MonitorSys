@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"MonitoringSystemAPI/models"
+	"encoding/json"
 	"fmt"
 	"security"
 	"time"
@@ -51,8 +52,9 @@ func (a *AppController) AppLogin() {
 	var app models.AppInfo
 	var appmap map[string]interface{}
 	appmap = make(map[string]interface{})
-	app.AppName = a.GetString("AppName")
-	app.Password = a.GetString("Password")
+	json.Unmarshal(a.Ctx.Input.RequestBody, &app)
+	//	app.AppName = a.GetString("AppName")
+	//	app.Password = a.GetString("Password")
 	app.RegTime = time.Now().Format("2006-01-02 15:04:05")
 	if models.AppExist(app.AppName) == 1 {
 		appid := models.AppLogin(app.AppName, app.Password)

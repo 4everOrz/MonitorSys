@@ -18,6 +18,7 @@ var (
 func (s *ServerInfo) TableName() string {
 	return TableName("serverInfo")
 }
+
 func AddSver(serverinfo *ServerInfo) (int64, error) {
 
 	return orm.NewOrm().Insert(serverinfo)
@@ -32,7 +33,7 @@ func GetSverByAddress(saddress string) *ServerInfo {
 func GetSverFilter() []orm.Params {
 	var op []orm.Params
 	//	orm.NewOrm().QueryTable(serverInfo).All(&serarry, "ServerAddress", "Delay")
-	orm.NewOrm().Raw("SELECT *  FROM serverInfo").Values(&op, "ServerAddress", "Delay")
+	orm.NewOrm().Raw("SELECT *  FROM serverInfo").Values(&op, "ServerAddress", "ServerName", "Delay", "Port")
 	return op
 }
 
