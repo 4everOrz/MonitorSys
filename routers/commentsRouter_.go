@@ -7,124 +7,170 @@ import (
 
 func init() {
 
-	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:AppController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:AppController"],
+	beego.GlobalControllerRouter["MonitorSys/controllers:AppController"] = append(beego.GlobalControllerRouter["MonitorSys/controllers:AppController"],
 		beego.ControllerComments{
-			Method: "AppLogin",
-			Router: `/alogin`,
+			Method:           "AppLogin",
+			Router:           `/alogin`,
 			AllowHTTPMethods: []string{"post"},
-			MethodParams: param.Make(),
-			Params: nil})
+			MethodParams:     param.Make(),
+			Params:           nil})
 
-	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:AppController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:AppController"],
+	beego.GlobalControllerRouter["MonitorSys/controllers:AppController"] = append(beego.GlobalControllerRouter["MonitorSys/controllers:AppController"],
 		beego.ControllerComments{
-			Method: "AppRegist",
-			Router: `/aregist`,
+			Method:           "AppRegist",
+			Router:           `/aregist`,
 			AllowHTTPMethods: []string{"post"},
-			MethodParams: param.Make(),
-			Params: nil})
+			MethodParams:     param.Make(),
+			Params:           nil})
 
-	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:MdController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:MdController"],
+	beego.GlobalControllerRouter["MonitorSys/controllers:AppController"] = append(beego.GlobalControllerRouter["MonitorSys/controllers:AppController"],
 		beego.ControllerComments{
-			Method: "Post",
-			Router: `/`,
+			Method:           "GetAll",
+			Router:           `/getaall`,
 			AllowHTTPMethods: []string{"post"},
-			MethodParams: param.Make(),
-			Params: nil})
+			MethodParams:     param.Make(),
+			Params:           nil})
 
-	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:MdController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:MdController"],
+	beego.GlobalControllerRouter["MonitorSys/controllers:AppController"] = append(beego.GlobalControllerRouter["MonitorSys/controllers:AppController"],
 		beego.ControllerComments{
-			Method: "Get",
-			Router: `/`,
+			Method:           "UpdateApp",
+			Router:           `/update`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+	beego.GlobalControllerRouter["MonitorSys/controllers:AppController"] = append(beego.GlobalControllerRouter["MonitorSys/controllers:AppController"],
+		beego.ControllerComments{
+			Method:           "AppHeart",
+			Router:           `/heart`,
 			AllowHTTPMethods: []string{"get"},
-			MethodParams: param.Make(),
-			Params: nil})
-
-	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:MdController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:MdController"],
+			MethodParams:     param.Make(),
+			Params:           nil})
+	beego.GlobalControllerRouter["MonitorSys/controllers:MdController"] = append(beego.GlobalControllerRouter["MonitorSys/controllers:MdController"],
 		beego.ControllerComments{
-			Method: "GetAll",
-			Router: `/getall`,
+			Method:           "Post",
+			Router:           `/`,
 			AllowHTTPMethods: []string{"post"},
-			MethodParams: param.Make(),
-			Params: nil})
+			MethodParams:     param.Make(),
+			Params:           nil})
 
-	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:MdController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:MdController"],
+	beego.GlobalControllerRouter["MonitorSys/controllers:MdController"] = append(beego.GlobalControllerRouter["MonitorSys/controllers:MdController"],
 		beego.ControllerComments{
-			Method: "GetData",
-			Router: `/getone`,
+			Method:           "GetAll",
+			Router:           `/getall`,
 			AllowHTTPMethods: []string{"post"},
-			MethodParams: param.Make(),
-			Params: nil})
+			MethodParams:     param.Make(),
+			Params:           nil})
 
-	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:ServerController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:ServerController"],
+	beego.GlobalControllerRouter["MonitorSys/controllers:MdController"] = append(beego.GlobalControllerRouter["MonitorSys/controllers:MdController"],
 		beego.ControllerComments{
-			Method: "Addone",
-			Router: `/add`,
+			Method:           "GetAllFilter",
+			Router:           `/getfilter`,
 			AllowHTTPMethods: []string{"post"},
-			MethodParams: param.Make(),
-			Params: nil})
+			MethodParams:     param.Make(),
+			Params:           nil})
 
-	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:ServerController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:ServerController"],
+	beego.GlobalControllerRouter["MonitorSys/controllers:MdController"] = append(beego.GlobalControllerRouter["MonitorSys/controllers:MdController"],
 		beego.ControllerComments{
-			Method: "GetServerAll",
-			Router: `/all`,
+			Method:           "GetData",
+			Router:           `/getone`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+
+	beego.GlobalControllerRouter["MonitorSys/controllers:RoleController"] = append(beego.GlobalControllerRouter["MonitorSys/controllers:RoleController"],
+		beego.ControllerComments{
+			Method:           "Getall",
+			Router:           `/rgetall`,
 			AllowHTTPMethods: []string{"get"},
-			MethodParams: param.Make(),
-			Params: nil})
+			MethodParams:     param.Make(),
+			Params:           nil})
 
-	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:ServerController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:ServerController"],
+	beego.GlobalControllerRouter["MonitorSys/controllers:ServerController"] = append(beego.GlobalControllerRouter["MonitorSys/controllers:ServerController"],
 		beego.ControllerComments{
-			Method: "GetServerFilter",
-			Router: `/filter`,
+			Method:           "Addone",
+			Router:           `/add`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+
+	beego.GlobalControllerRouter["MonitorSys/controllers:ServerController"] = append(beego.GlobalControllerRouter["MonitorSys/controllers:ServerController"],
+		beego.ControllerComments{
+			Method:           "GetServerAll",
+			Router:           `/all`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+
+	beego.GlobalControllerRouter["MonitorSys/controllers:ServerController"] = append(beego.GlobalControllerRouter["MonitorSys/controllers:ServerController"],
+		beego.ControllerComments{
+			Method:           "GetServerFilter",
+			Router:           `/filter`,
 			AllowHTTPMethods: []string{"get"},
-			MethodParams: param.Make(),
-			Params: nil})
+			MethodParams:     param.Make(),
+			Params:           nil})
 
-	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:UserController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:UserController"],
+	beego.GlobalControllerRouter["MonitorSys/controllers:ServerController"] = append(beego.GlobalControllerRouter["MonitorSys/controllers:ServerController"],
 		beego.ControllerComments{
-			Method: "Changekey",
-			Router: `/changekey`,
+			Method:           "Updateone",
+			Router:           `/update`,
 			AllowHTTPMethods: []string{"post"},
-			MethodParams: param.Make(),
-			Params: nil})
+			MethodParams:     param.Make(),
+			Params:           nil})
 
-	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:UserController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:UserController"],
+	beego.GlobalControllerRouter["MonitorSys/controllers:UserController"] = append(beego.GlobalControllerRouter["MonitorSys/controllers:UserController"],
 		beego.ControllerComments{
-			Method: "Getall",
-			Router: `/getall`,
+			Method:           "Changekey",
+			Router:           `/changekey`,
 			AllowHTTPMethods: []string{"post"},
-			MethodParams: param.Make(),
-			Params: nil})
+			MethodParams:     param.Make(),
+			Params:           nil})
 
-	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:UserController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:UserController"],
+	beego.GlobalControllerRouter["MonitorSys/controllers:UserController"] = append(beego.GlobalControllerRouter["MonitorSys/controllers:UserController"],
 		beego.ControllerComments{
-			Method: "Login",
-			Router: `/ulogin`,
+			Method:           "Getall",
+			Router:           `/getall`,
 			AllowHTTPMethods: []string{"post"},
-			MethodParams: param.Make(),
-			Params: nil})
+			MethodParams:     param.Make(),
+			Params:           nil})
 
-	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:UserController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:UserController"],
+	beego.GlobalControllerRouter["MonitorSys/controllers:UserController"] = append(beego.GlobalControllerRouter["MonitorSys/controllers:UserController"],
 		beego.ControllerComments{
-			Method: "Logout",
-			Router: `/ulogout`,
+			Method:           "Login",
+			Router:           `/ulogin`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+
+	beego.GlobalControllerRouter["MonitorSys/controllers:UserController"] = append(beego.GlobalControllerRouter["MonitorSys/controllers:UserController"],
+		beego.ControllerComments{
+			Method:           "Logout",
+			Router:           `/ulogout`,
 			AllowHTTPMethods: []string{"get"},
-			MethodParams: param.Make(),
-			Params: nil})
+			MethodParams:     param.Make(),
+			Params:           nil})
 
-	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:UserController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:UserController"],
+	beego.GlobalControllerRouter["MonitorSys/controllers:UserController"] = append(beego.GlobalControllerRouter["MonitorSys/controllers:UserController"],
 		beego.ControllerComments{
-			Method: "Regist",
-			Router: `/uregist`,
+			Method:           "Regist",
+			Router:           `/uregist`,
 			AllowHTTPMethods: []string{"post"},
-			MethodParams: param.Make(),
-			Params: nil})
+			MethodParams:     param.Make(),
+			Params:           nil})
 
-	beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:WebSocketController"] = append(beego.GlobalControllerRouter["MonitoringSystemAPI/controllers:WebSocketController"],
+	beego.GlobalControllerRouter["MonitorSys/controllers:UserController"] = append(beego.GlobalControllerRouter["MonitorSys/controllers:UserController"],
 		beego.ControllerComments{
-			Method: "Join",
-			Router: `/`,
+			Method:           "UpdateOne",
+			Router:           `/uupdate`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+
+	beego.GlobalControllerRouter["MonitorSys/controllers:WebSocketController"] = append(beego.GlobalControllerRouter["MonitorSys/controllers:WebSocketController"],
+		beego.ControllerComments{
+			Method:           "Join",
+			Router:           `/`,
 			AllowHTTPMethods: []string{"get"},
-			MethodParams: param.Make(),
-			Params: nil})
+			MethodParams:     param.Make(),
+			Params:           nil})
 
 }

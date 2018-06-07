@@ -1,9 +1,9 @@
 package main
 
 import (
-	"MonitoringSystemAPI/Data"
-	"MonitoringSystemAPI/models"
-	_ "MonitoringSystemAPI/routers"
+	"MonitorSys/controllers"
+	"MonitorSys/models"
+	_ "MonitorSys/routers"
 
 	"github.com/astaxie/beego"
 )
@@ -14,13 +14,7 @@ func main() {
 		beego.BConfig.WebConfig.DirectoryIndex = true
 		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
 	}
-	models.Init()
-	go Data.MqReceive()
-	/*	beego.InsertFilter("/platform/*", beego.BeforeRouter, func(ctx *context.Context) {
-		cookie, err := ctx.Request.Cookie("Authorization")
-		if err != nil || !lib.CheckToken(cookie.Value) {
-			http.Redirect(ctx.ResponseWriter, ctx.Request, "/", http.StatusMovedPermanently)
-		}
-	})*/
+	models.OrmInit()        //Mysql数据库初始化
+	controllers.RedisInit() //向redis里初始化存储数据
 	beego.Run()
 }

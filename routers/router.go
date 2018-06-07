@@ -8,7 +8,7 @@
 package routers
 
 import (
-	"MonitoringSystemAPI/controllers"
+	"MonitorSys/controllers"
 
 	"github.com/astaxie/beego"
 )
@@ -38,6 +38,11 @@ func init() {
 		beego.NSNamespace("/sv",
 			beego.NSInclude(
 				&controllers.ServerController{},
+			),
+		),
+		/**/ beego.NSNamespace("/rl",
+			beego.NSInclude(
+				&controllers.RoleController{},
 			),
 		),
 	)

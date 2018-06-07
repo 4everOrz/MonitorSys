@@ -1,13 +1,18 @@
 package models
 
-import "github.com/astaxie/beego/orm"
+import (
+	"github.com/astaxie/beego/orm"
+)
 
 type ServerInfo struct {
 	ServerID      int64  `orm:"pk;column(ServerID)"`
 	ServerName    string `orm:"column(ServerName)"`
+	Type          string `orm:"column(Type)"`
 	ServerAddress string `orm:"column(ServerAddress)"`
 	Port          string `orm:"column(Port)"`
-	Delay         string `orm:"column(Delay)"`
+	ReqInterval   string `orm:"column(ReqInterval)"`
+	Sstatus       string `orm:"column(Sstatus)"`
+	Info          string `orm:"column(Info)"`
 	//MonitorData   []*MonitorData `orm:"reverse(many)"`
 }
 
@@ -30,17 +35,26 @@ func GetSverByAddress(saddress string) *ServerInfo {
 }
 
 //条件获取
-func GetSverFilter() []orm.Params {
+func GetSverFilter(status string) []orm.Params {
 	var op []orm.Params
+	o := orm.NewOrm()
 	//	orm.NewOrm().QueryTable(serverInfo).All(&serarry, "ServerAddress", "Delay")
-	orm.NewOrm().Raw("SELECT *  FROM serverInfo").Values(&op, "ServerAddress", "ServerName", "Delay", "Port")
+	o.Raw("SELECT *  FROM serverInfo WHERE Sstatus=?", status).Values(&op, "ServerAddress", "ServerName", "ServerID", "ReqInterval", "Port", "Type")
 	return op
 }
 
 //获取全部
-func GetSverAll() []orm.Params {
+func GetSverAll() ([]orm.Params, int) {
 	var op []orm.Params
 	orm.NewOrm().Raw("SELECT *  FROM serverInfo").Values(&op)
-	return op
+	count := len(op)
+	return op, count
 
+}
+func UpdateSver(serverinfo *ServerInfo) (int64, error) {
+	serverInfo := new(ServerInfo)
+	num, err := orm.NewOrm().QueryTable(serverInfo).Filter("ServerID", serverinfo.ServerID).Update(orm.Params{
+		"ServerName": serverinfo.ServerName, "ServerAddress": serverinfo.ServerAddress, "Port": serverinfo.Port, "Type": serverinfo.Type, "ReqInterval": serverinfo.ReqInterval, "Sstatus": serverinfo.Sstatus, "Info": serverinfo.Info,
+	})
+	return num, err
 }
