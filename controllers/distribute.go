@@ -1,14 +1,16 @@
 package controllers
 
 import (
-	"SvrMonitoringSys/monistorSys/lib"
-	"SvrMonitoringSys/monistorSys/models"
+	"MonitorSys/lib"
+	"MonitorSys/models"
 	"encoding/json"
+	"log"
 
 	"strconv"
 	"time"
 
 	"github.com/astaxie/beego/orm"
+	"github.com/streadway/amqp"
 
 	"github.com/astaxie/beego"
 )
@@ -21,55 +23,102 @@ var (
 )
 
 func init() {
-	Percent = beego.AppConfig.DefaultInt("percent", 50) //取不到值默认50%
-	ErrTimeDelay = beego.AppConfig.DefaultInt64("err.timedelay", 300)
-	ErrCount = beego.AppConfig.DefaultInt("err.errcount", 25)
+	Percent, _ = beego.AppConfig.Int("percent")
 }
 
 /*************************接收MQ数据并处理分发***************************/
-func catchdata(body []byte) bool {
-	var md models.MonitorData
-	json.Unmarshal(body, &md)
-	if md.AppID == 0 || md.FlagBit == "" || md.StatusCode == "" || md.NetworkProtocol == "" || md.NetworkType == "" || md.ServerID == 0 {
-		beego.Error("data format error or missing some field ")
-		return false
-	} else {
-		md.SubTime = time.Now().Format("2006-01-02 15:04:05")
-		dataID, err1 := models.Add1(&md)
-		if err1 != nil {
-			beego.Error("something wrong on pushing in Mysql", err1)
-		}
-		if subscribers.Len() != 0 {
-			appinfo, err1 := redisHMGET("AppID:" + strconv.FormatInt(md.AppID, 10))
-			appinfo["Password"] = ""
-			serverinfo, err2 := redisHMGET("ServerID:" + strconv.Itoa(md.ServerID))
-			if err1 != nil || err2 != nil {
-				databyte := models.GetMDbyID(dataID, md.ServerID)
-				publish <- newEvent(databyte)
-			} else {
-				var databyte = make(map[string]interface{})
-				for key, value := range appinfo {
-					databyte[key] = value
-					if key == "AppToken" {
-						databyte["AppToken"] = ""
-					}
-				}
-				for key2, value2 := range serverinfo {
-					databyte[key2] = value2
-				}
-				mdmap := lib.Struct2Map(md)
-				for key3, value3 := range mdmap {
-					databyte[key3] = value3
-				}
-				datamsg := []orm.Params{databyte}
-				publish <- newEvent(datamsg)
-			}
-		}
-		go judgement(md.ServerID, md.AppID, md.StatusCode, md.FlagBit, md.Port, md.NetworkProtocol)
+/*************************接收MQ数据并处理分发***************************/
 
-		return true
-	}
+func MqReceive() {
+	connSucessFlag := make(chan int, 1)
+	mq := GetConsumerConn(connSucessFlag)
+
+	go func() {
+		for {
+			<-mq.connflag
+			go Catchdata(mq)
+			go consumerConnListener(mq)
+		}
+	}()
 }
+
+/*************************接收MQ数据并处理分发***************************/
+func Catchdata(*MqConsumer) {
+	//var s *string
+	defer mq2.mqClose()
+	var err error
+
+	var md models.MonitorData
+	if mq2.channel == nil {
+		mq2.channel, _ = mq2.conn.Channel()
+	}
+
+	msgs, err := mq2.channel.Consume(MQueueName, "", true, false, false, false, nil)
+	if err != nil {
+		beego.Error(err, "mqconsumer  connect error,try reconnect!")
+		/*	mq2.mqClose()
+			mq2 = nil
+			MqReceive()*/
+		return
+	}
+
+	//	go func() {
+	for d := range msgs {
+		//	s = bytesToString(&(d.Body))
+		//	Timercount = 0
+		json.Unmarshal(d.Body, &md)
+		if md.AppID == 0 || md.FlagBit == "" || md.StatusCode == "" || md.NetworkProtocol == "" || md.NetworkType == "" || md.ServerID == 0 {
+			beego.Error("data format error or missing some field ")
+			return
+		} else {
+
+			md.SubTime = time.Now().Format("2006-01-02 15:04:05")
+			dataID, err1 := models.Add1(&md)
+			if err1 != nil {
+				beego.Error("something wrong on pushing in Mysql", err1)
+			}
+			if subscribers.Len() != 0 {
+				appinfo, err1 := redisHMGET("AppID:" + strconv.FormatInt(md.AppID, 10))
+				appinfo["Password"] = ""
+				serverinfo, err2 := redisHMGET("ServerID:" + strconv.Itoa(md.ServerID))
+				if err1 != nil || err2 != nil {
+					databyte := models.GetMDbyID(dataID, md.ServerID)
+					publish <- newEvent(databyte)
+				} else {
+					var databyte = make(map[string]interface{})
+					for key, value := range appinfo {
+						databyte[key] = value
+						if key == "AppToken" {
+							databyte["AppToken"] = ""
+						}
+					}
+					for key2, value2 := range serverinfo {
+						databyte[key2] = value2
+					}
+					mdmap := lib.Struct2Map(md)
+					for key3, value3 := range mdmap {
+						databyte[key3] = value3
+					}
+					datamsg := []orm.Params{databyte}
+					publish <- newEvent(datamsg)
+				}
+			}
+			go judgement(md.ServerID, md.AppID, md.StatusCode, md.FlagBit, md.Port, md.NetworkProtocol)
+		}
+	}
+	//	}()
+
+}
+func consumerConnListener(mq2 *MqConsumer) {
+	cc := make(chan *amqp.Error)
+	e := <-mq2.conn.NotifyClose(cc)
+	log.Println("mqconsumer  connect error,try reconnect", e)
+	mq2.mqClose()
+	mq2.conn = nil
+	mq2.channel = nil
+	mq2.rabbitConnector()
+	mq2.channel, _ = mq2.conn.Channel()
+} /**/
 func judgement(serverID int, appID int64, statuscode, flagbit, port, networkprotocol string) {
 	serverid := strconv.Itoa(serverID)
 	appid := strconv.FormatInt(appID, 10)

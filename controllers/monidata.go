@@ -4,9 +4,8 @@ import (
 	"MonitorSys/models"
 	"strconv"
 
-	"github.com/astaxie/beego/orm"
-
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/orm"
 )
 
 type MdController struct {
@@ -19,16 +18,17 @@ func (md *MdController) Post() {
 	//	appid:=header["AppID"]
 	//apptoken:=header["AppToken"]
 	ms := md.Ctx.Input.RequestBody
-
 	length := len(ms)
 	if length > 120 && length < 280 && ms[0] == 123 && ms[length-1] == 125 {
-		if catchdata(ms) {
+		if ProducterConnTag == true {
+			MqfeildSend().text <- ms
 			result := &Result{0, "success", 0, nil}
 			md.Data["json"] = result
 		} else {
-			result := &Result{1, "failed", 0, nil}
+			result := &Result{1, "failed", 0, "rabbitmq is reconnecting"}
 			md.Data["json"] = result
 		}
+
 	} else {
 		result := &Result{1, "Unlawful data", 0, nil}
 		md.Data["json"] = result

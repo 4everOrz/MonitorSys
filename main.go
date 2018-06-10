@@ -16,5 +16,6 @@ func main() {
 	}
 	models.OrmInit()        //Mysql数据库初始化
 	controllers.RedisInit() //向redis里初始化存储数据
+	controllers.MqReceive()
 	beego.Run()
 }
