@@ -75,16 +75,18 @@ func judgement(serverID int, appID int64, statuscode, flagbit, port, networkprot
 	appid := strconv.FormatInt(appID, 10)
 	serverinfo, _ := redisHMGET("ServerID:" + serverid)
 	appinfo, _ := redisHMGET("AppID:" + appid)
+	region := appinfo["Region"]
 	statuscodeinfo, _ := redisGet("StatusCode:" + statuscode)
 	//	flagbit = samplefilter(serverID, port, flagbit, networkprotocol)
-	portpercent := svrnetypeportappjudge(serverid, port, flagbit, networkprotocol, appid)
+	portpercent := judgecount(serverid, port, flagbit, networkprotocol, appid, region)
+	beego.Informational("ErrorPercent:", portpercent, "SvrNetPortApp:", serverid+"/"+networkprotocol+"/"+port+"/"+appid, "SvrNetPortAppArry:", SvrNetPortAppArry[serverid+"/"+networkprotocol+"/"+port+"/"+appid])
 	nacy := lemonfilter(serverid, appid, flagbit, port, networkprotocol)
 	if portpercent >= Percent && nacy && statuscode != "normal" && statuscode != "200" && statuscode != "4" {
 		if timerparse(serverid, networkprotocol, port, appid) {
 			if portpercent >= Percent && nacy && statuscode != "normal" && statuscode != "200" && statuscode != "4" {
-				reson := resonjudge(serverid, appid, port, flagbit, networkprotocol)
-				//	go messageSend(serverid, port, statuscode, reson) //消息通知
-				beego.Informational("服务器：" + serverinfo["ServerName"] + ",网络协议：" + networkprotocol + "端口：" + port + ", 状态信息：" + statuscode + "-" + statuscodeinfo + ", 数据源地区：" + appinfo["Region"] + ", App昵称：" + appinfo["AppName"] + ",可能原因：" + reson)
+				reson := resonjudge(serverid, appid, port, flagbit, networkprotocol, region)
+				go messageSend(serverid, port, statuscode, reson) //消息通知
+				beego.Informational("服务器：" + serverinfo["ServerName"] + ",网络协议：" + networkprotocol + "端口：" + port + ", 状态信息：" + statuscode + "-" + statuscodeinfo + ", 数据源地区：" + region + ", App昵称：" + appinfo["AppName"] + ",可能原因：" + reson)
 			}
 		}
 	}
@@ -102,9 +104,9 @@ func lemonfilter(serverID, appid, flagbit, port, netprotocol string) bool {
 	}
 	return SvrNetPortAppCount[svrnetportappstr] > ErrCount
 }
-func resonjudge(serverID, appID, port, flagbit, networkprotocol string) string {
+func resonjudge(serverID, appID, port, flagbit, networkprotocol, region string) string {
 	possibility := ""
-	regionsvrdef, svrregiondef, regionappdef, svrnetportdef, svrappdef := mathBoss(serverID, appID, port, flagbit, networkprotocol)
+	regionsvrdef, svrregiondef, regionappdef, svrnetportdef, svrappdef := chaducount(serverID, appID, port, flagbit, networkprotocol, region)
 	chadu := []float64{regionsvrdef, svrregiondef, regionappdef, svrnetportdef, svrappdef}
 	BubbleSort(chadu)
 	switch chadu[4] {
@@ -121,7 +123,6 @@ func resonjudge(serverID, appID, port, flagbit, networkprotocol string) string {
 	}
 	return possibility
 }
-
 func timerparse(serverid, netprotocol, port, appid string) bool {
 	svrnetportappstr := serverid + "/" + netprotocol + "/" + port + "/" + appid
 	if SvrNetPortAppTime[svrnetportappstr] == 0 {
