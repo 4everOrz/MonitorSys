@@ -102,7 +102,6 @@ func MqfeildSend() *MqProducter {
 		for {
 			<-mq1.connflag
 			go mq1.translate()
-			go producterConnListener()
 		}
 	}()
 
@@ -131,7 +130,6 @@ func (c *MqProducter) connectToRabbitMQ() {
 
 		if err == nil {
 			c.connflag <- 1
-			ProducterConnTag = true
 			break
 		}
 		time.Sleep(500 * time.Millisecond)
@@ -155,21 +153,16 @@ func (c *MqProducter) rabbitConnector() {
 	for {
 		rabbitErr = <-c.RabbitError //connection closed error reader
 		if rabbitErr != nil {
+			ProducterConnTag = false
+			log.Println("mqproducter connect error,try reconnect!")
+			c.conn = nil
+			c.channel = nil
 			c.connectToRabbitMQ()
+			c.channel, _ = c.conn.Channel()
+			ProducterConnTag = true
+			log.Println("mqproducter connect ok!")
 			c.RabbitError = make(chan *amqp.Error) //reinitialize the connection close error
 			c.conn.NotifyClose(c.RabbitError)      //reset the connection listener
 		}
 	}
-}
-
-//监听生产者是否连接出现错误
-func producterConnListener() {
-	cc := make(chan *amqp.Error)
-	e := <-mq1.conn.NotifyClose(cc)
-	ProducterConnTag = false
-	log.Println("mqproducter connect error,try reconnect", e)
-	mq1.conn = nil
-	mq1.channel = nil
-	mq1.rabbitConnector()
-	mq1.channel, _ = mq1.conn.Channel()
 }
